@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Clock, User, Tag, Calendar } from 'lucide-react'
 import Link from 'next/link'
@@ -40,23 +40,28 @@ interface Article {
 }
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 export default function ArticlePage({ params }: PageProps) {
   const [article, setArticle] = useState<Article | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [slug, setSlug] = useState<string>('')
 
   useEffect(() => {
-    fetchArticle()
-  }, [params.slug])
+    const getParams = async () => {
+      const { slug: paramSlug } = await params
+      setSlug(paramSlug)
+    }
+    getParams()
+  }, [params])
 
-  const fetchArticle = async () => {
+  const fetchArticle = useCallback(async () => {
     try {
-      const response = await fetch(`/api/articles/${params.slug}`)
+      const response = await fetch(`/api/articles/${slug}`)
       if (!response.ok) {
         throw new Error('Article not found')
       }
@@ -67,7 +72,13 @@ export default function ArticlePage({ params }: PageProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [slug])
+
+  useEffect(() => {
+    if (slug) {
+      fetchArticle()
+    }
+  }, [slug, fetchArticle])
 
   if (loading) {
     return (

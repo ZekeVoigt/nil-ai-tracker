@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/database'
 import { articleGenerator } from '@/lib/services/article-generator'
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     console.log('🧪 Creating test NIL deal and generating article...')
     

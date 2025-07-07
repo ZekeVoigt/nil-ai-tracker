@@ -2,6 +2,7 @@ import { prisma } from '@/lib/database'
 import { ArticleCard } from '@/components/article-card'
 import { HeroSection } from '@/components/hero-section'
 import { StatsSection } from '@/components/stats-section'
+import Link from 'next/link'
 
 export default async function HomePage() {
   // Fetch latest articles
@@ -63,14 +64,14 @@ export default async function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {latestArticles.map((article) => (
+              {latestArticles.map((article: any) => (
                 <ArticleCard key={article.id} article={article} />
               ))}
             </div>
 
             {/* View All Articles Link */}
             <div className="text-center mt-12">
-              <a 
+              <Link 
                 href="/articles"
                 className="inline-flex items-center gap-2 px-6 py-3 border border-zinc-300 text-black hover:border-black transition-colors duration-300 font-light"
               >
@@ -78,7 +79,7 @@ export default async function HomePage() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7"/>
                 </svg>
-              </a>
+              </Link>
             </div>
           </div>
         </section>
