@@ -1,0 +1,159 @@
+// Production Prisma schema for Vercel deployment
+// Use this for production with PostgreSQL database
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Athlete {
+  id          String   @id @default(cuid())
+  name        String
+  sport       String
+  school      String
+  position    String?
+  year        String?  // Freshman, Sophomore, etc.
+  
+  // Social media handles
+  twitterHandle    String?
+  instagramHandle  String?
+  
+  // Profile data
+  profileImageUrl  String?
+  verified         Boolean @default(false)
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  nilDeals    NILDeal[]
+  articles    Article[]
+}
+
+model NILDeal {
+  id              String   @id @default(cuid())
+  
+  // Deal Information
+  title           String
+  description     String?
+  dealValue       String?  // Could be undisclosed
+  dealType        String   // Endorsement, Appearance, Social Media, etc.
+  brand           String?
+  
+  // Deal Details
+  announcementDate DateTime
+  sourceUrl       String?
+  verified        Boolean  @default(false)
+  confidence      Float    @default(0.0) // AI confidence score 0-1
+  
+  // Processing Status
+  status          String   @default("pending") // pending, verified, published, rejected
+  processed       Boolean  @default(false)
+  
+  // Metadata
+  sourceType      String?  // twitter, news, official, etc.
+  rawData         String?  // JSON string of original source data
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  athleteId       String
+  athlete         Athlete  @relation(fields: [athleteId], references: [id])
+  articles        Article[]
+}
+
+model Article {
+  id              String   @id @default(cuid())
+  
+  // Content
+  title           String
+  content         String   // Full article content
+  excerpt         String?  // Short summary
+  slug            String   @unique
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  keywords        String?  // Comma-separated
+  
+  // Article Details
+  wordCount       Int?
+  readingTime     Int?     // Minutes
+  featuredImage   String?
+  
+  // Publishing
+  published       Boolean  @default(false)
+  publishedAt     DateTime?
+  scheduledFor    DateTime?
+  
+  // AI Generation
+  aiGenerated     Boolean  @default(true)
+  aiModel         String?  // Which AI model generated it
+  generationPrompt String? // The prompt used
+  
+  // Performance
+  views           Int      @default(0)
+  shares          Int      @default(0)
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  nilDealId       String?
+  nilDeal         NILDeal? @relation(fields: [nilDealId], references: [id])
+  athleteId       String?
+  athlete         Athlete? @relation(fields: [athleteId], references: [id])
+  tags            ArticleTag[]
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  color     String?
+  
+  createdAt DateTime @default(now())
+  
+  articles  ArticleTag[]
+}
+
+model ArticleTag {
+  articleId String
+  tagId     String
+  
+  article   Article @relation(fields: [articleId], references: [id])
+  tag       Tag     @relation(fields: [tagId], references: [id])
+  
+  @@id([articleId, tagId])
+}
+
+model MonitoringSource {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  type          String   // twitter, rss, website, etc.
+  url           String?
+  active        Boolean  @default(true)
+  lastChecked   DateTime?
+  checkInterval Int      @default(300) // seconds
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model ProcessingLog {
+  id          String   @id @default(cuid())
+  type        String   // scraping, generation, publishing, etc.
+  status      String   // success, error, warning
+  message     String
+  data        String?  // JSON string
+  
+  createdAt   DateTime @default(now())
+} 
