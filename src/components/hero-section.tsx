@@ -1,10 +1,25 @@
 "use client"
 
 import { motion } from "framer-motion"
+import Link from "next/link"
 
 export function HeroSection() {
   return (
     <section className="bg-white py-32 md:py-48">
+      {/* Navigation */}
+      <motion.nav 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="container mx-auto px-8 py-6"
+      >
+        <div className="flex justify-between items-center">
+          
+          
+         
+        </div>
+      </motion.nav>
+
       <div className="container mx-auto px-8 text-center">
         <div className="max-w-4xl mx-auto">
           <motion.div
