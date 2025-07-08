@@ -4,36 +4,50 @@ import { HeroSection } from '@/components/hero-section'
 import { StatsSection } from '@/components/stats-section'
 import Link from 'next/link'
 
+// Force dynamic rendering instead of static generation
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
-  // Fetch latest articles
-  const latestArticles = await prisma.article.findMany({
-    where: {
-      published: true
-    },
-    include: {
-      athlete: true,
-      nilDeal: true,
-      tags: {
-        include: {
-          tag: true
+  let latestArticles: any[] = []
+  let totalArticles = 0
+  let totalDeals = 0
+  let totalAthletes = 0
+  let processedDeals = 0
+
+  try {
+    // Fetch latest articles
+    latestArticles = await prisma.article.findMany({
+      where: {
+        published: true
+      },
+      include: {
+        athlete: true,
+        nilDeal: true,
+        tags: {
+          include: {
+            tag: true
+          }
         }
-      }
-    },
-    orderBy: {
-      publishedAt: 'desc'
-    },
-    take: 6
-  })
+      },
+      orderBy: {
+        publishedAt: 'desc'
+      },
+      take: 6
+    })
 
-  // Fetch platform statistics
-  const stats = await Promise.all([
-    prisma.article.count({ where: { published: true } }),
-    prisma.nILDeal.count({ where: { verified: true } }),
-    prisma.athlete.count(),
-    prisma.nILDeal.count({ where: { processed: true } })
-  ])
+    // Fetch platform statistics
+    const stats = await Promise.all([
+      prisma.article.count({ where: { published: true } }),
+      prisma.nILDeal.count({ where: { verified: true } }),
+      prisma.athlete.count(),
+      prisma.nILDeal.count({ where: { processed: true } })
+    ])
 
-  const [totalArticles, totalDeals, totalAthletes, processedDeals] = stats
+    ;[totalArticles, totalDeals, totalAthletes, processedDeals] = stats
+  } catch (error) {
+    console.error('Database connection error:', error)
+    // Continue with empty data - homepage will show empty state
+  }
 
   return (
     <div className="min-h-screen bg-white">
